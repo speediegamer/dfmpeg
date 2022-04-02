@@ -1,0 +1,25 @@
+#!/bin/sh
+source ~/.config/dfmpeg/dfmpegrc || source $DFMPEG_DOTDIR/dfmpegrc
+
+startrec="ffmpeg -f $DFMPEG_RECORD_DEVICE -s $DFMPEG_RESOLUTION -i $DFMPEG_WH -f $DFMPEG_AUDIO_DEVICE -i default $DFMPEG_OUTPUT_FILENAME"
+stoprec="pkill ffmpeg"
+
+# Options
+declare -a opt=(
+"Start"
+"Stop"
+"Configure"
+"Exit"
+)
+
+DFMPEG_CHOOSE=$(printf '%s\n' ${opt[@]} | dmenu -p 'Record your screen:')
+
+if [[ "$DFMPEG_CHOOSE" = "Exit" ]]; then
+DFMPEG_STATUS=idle && exit 0
+elif [[ "$DFMPEG_CHOOSE" = "Start" ]]; then
+$startrec && DFMPEG_STATUS=recording && exit 0
+elif [[ "$DFMPEG_CHOOSE" = "Stop" ]]; then
+$stoprec && DFMPEG_STATUS=idle
+elif [[ "$DFMPEG_CHOOSE" = "Configure" ]]; then
+$DFMPEG_TERM $DFMPEG_EDITOR $DFMPEG_DOTDIR/dfmpegrc
+fi

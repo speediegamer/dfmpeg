@@ -1,0 +1,12 @@
+DFMPEG_DOTDIR=~/.config/dfmpeg # The directory where dotfiles are
+DFMPEG_RESOLUTION=1920x1080 # The resolution to record in
+DFMPEG_AUDIO_DEVICE=alsa # How to capture audio (alsa/pulseaudio)
+DFMPEG_FRAME_RATE=60 # Frame rate to capture in.
+DFMPEG_RECORD_DEVICE=x11grab # Probably do not change.
+DFMPEG_OUTPUT_PATH=~/Videos # Path where videos will be saved.
+DFMPEG_OUTPUT_FORMAT=mp4 # What format to use
+DFMPEG_OUTPUT_FILENAME=$DFMPEG_OUTPUT_PATH/Dfmpeg-Output-$(date +"%d-%d-%y-%T").$DFMPEG_OUTPUT_FORMAT # File name of the output. Probably don't need to change.
+DFMPEG_WH=:0.0 # Width and height, no need to change, defaults should work.
+DFMPEG_DMENU=dmenu # Path to dmenu
+DFMPEG_TERM=$TERMINAL # Terminal to use when editing the configuration file.
+DFMPEG_EDITOR=vim # Editor to edit the config file with

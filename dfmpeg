@@ -28,7 +28,7 @@ about_screen="dfmpeg $dfmpeg_ver."
 about_screen_2="Licensed under MIT, written by speedie + contributors."
 about_screen_3="https://github.com/speediegamer/dfmpeg"
 
-DFMPEG_CHOOSE=$(printf "Start\nStop\nStart-No-Audio\nConfigure\nExit\nAbout" | dmenu -p 'Record your screen:')
+DFMPEG_CHOOSE=$(printf 'Start\nStop\nStart-No-Audio\nConfigure\nExit\nAbout' | dmenu -p 'Record your screen:')
 
 if [ "$DFMPEG_CHOOSE" = "Exit" ]; then
 DFMPEG_STATUS=idle && exit 0

@@ -19,7 +19,7 @@ defaultConfig() {
 	FMPEG_EDITOR="vim" # Editor to edit the config file with
 }
 
-source ~/.config/dfmpeg/dfmpegrc || source $DFMPEG_DOTDIR/dfmpegrc || defaultConfig
+. ~/.config/dfmpeg/dfmpegrc || . "$DFMPEG_DOTDIR"/dfmpegrc || defaultConfig
 startrec="ffmpeg -f $DFMPEG_RECORD_DEVICE -s $DFMPEG_RESOLUTION -i $DFMPEG_WH -f $DFMPEG_AUDIO_DEVICE -i default $DFMPEG_OUTPUT_FILENAME"
 startrec_no_audio="ffmpeg -f $DFMPEG_RECORD_DEVICE -s $DFMPEG_RESOLUTION -i $DFMPEG_WH $DFMPEG_OUTPUT_FILENAME"
 stoprec="pkill ffmpeg"
@@ -27,32 +27,22 @@ dfmpeg_ver="2022-04-02-r2"
 about_screen="dfmpeg $dfmpeg_ver."
 about_screen_2="Licensed under MIT, written by speedie + contributors."
 about_screen_3="https://github.com/speediegamer/dfmpeg"
+
+DFMPEG_CHOOSE=$(printf "Start\nStop\nStart-No-Audio\nConfigure\nExit\nAbout" | dmenu -p 'Record your screen:')
+
+if [ "$DFMPEG_CHOOSE" = "Exit" ]; then
+DFMPEG_STATUS=idle && exit 0
+elif [ "$DFMPEG_CHOOSE" = "Start" ]; then
+DFMPEG_STATUS=recording && $startrec && exit 0
+elif [ "$DFMPEG_CHOOSE" = "Stop" ]; then
+$stoprec && DFMPEG_STATUS=idle
+elif [ "$DFMPEG_CHOOSE" = "Configure" ]; then
+$DFMPEG_TERM $DFMPEG_EDITOR $DFMPEG_DOTDIR/dfmpegrc
+elif [ "$DFMPEG_CHOOSE" = "Start-No-Audio" ]; then
+DFMPEG_STATUS=recording && $startrec_no_audio && exit 0
+elif [ "$DFMPEG_CHOOSE" = "About" ]; then
 echo $about_screen > $DFMPEG_DOTDIR/dfmpeg_about
 echo $about_screen_2 >> $DFMPEG_DOTDIR/dfmpeg_about
 echo $about_screen_3 >> $DFMPEG_DOTDIR/dfmpeg_about
-
-# Options
-declare -a opt=(
-"Start"
-"Stop"
-"Start-No-Audio"
-"Configure"
-"Exit"
-"About"
-)
-
-DFMPEG_CHOOSE=$(printf '%s\n' ${opt[@]} | dmenu -p 'Record your screen:')
-
-if [[ "$DFMPEG_CHOOSE" = "Exit" ]]; then
-DFMPEG_STATUS=idle && exit 0
-elif [[ "$DFMPEG_CHOOSE" = "Start" ]]; then
-DFMPEG_STATUS=recording && $startrec && exit 0
-elif [[ "$DFMPEG_CHOOSE" = "Stop" ]]; then
-$stoprec && DFMPEG_STATUS=idle
-elif [[ "$DFMPEG_CHOOSE" = "Configure" ]]; then
-$DFMPEG_TERM $DFMPEG_EDITOR $DFMPEG_DOTDIR/dfmpegrc
-elif [[ "$DFMPEG_CHOOSE" = "Start-No-Audio" ]]; then
-DFMPEG_STATUS=recording && $startrec_no_audio && exit 0
-elif [[ "$DFMPEG_CHOOSE" = "About" ]]; then
 $DFMPEG_TERM $DFMPEG_EDITOR $DFMPEG_DOTDIR/dfmpeg_about
 fi

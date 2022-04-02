@@ -19,7 +19,8 @@ defaultConfig() {
 	DFMPEG_EDITOR="vim" # Editor to edit the config file with
 }
 
-. ~/.config/dfmpeg/dfmpegrc || . "$DFMPEG_DOTDIR"/dfmpegrc || defaultConfig
+defaultConfig
+ "$DFMPEG_DOTDIR"/dfmpegrc
 startrec="ffmpeg -f $DFMPEG_RECORD_DEVICE -s $DFMPEG_RESOLUTION -i $DFMPEG_WH -f $DFMPEG_AUDIO_DEVICE -i default $DFMPEG_OUTPUT_FILENAME"
 startrec_no_audio="ffmpeg -f $DFMPEG_RECORD_DEVICE -s $DFMPEG_RESOLUTION -i $DFMPEG_WH $DFMPEG_OUTPUT_FILENAME"
 stoprec="pkill ffmpeg"

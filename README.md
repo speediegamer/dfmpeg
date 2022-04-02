@@ -11,14 +11,15 @@ Install the script (see installation) and run it using dmenu. Make sure to edit 
 Download the [script](https://raw.githubusercontent.com/speediegamer/dfmpeg/main/dfmpeg) and save it to /usr/bin, /usr/local/bin, or any other path specified in your shell's $PATH variable. Then chmod +x it to make sure it's executable.
 
 If /bin/sh isn't an alias then edit the script and change #!/bin/sh to a shell on your Linux system.
-The script will NOT run without a configuration file to unless you feel like writing the entire thing from scratch follow Configuration.
 
 ## Notes
+- This script IS fully POSIX compliant.
 - This script has ffmpeg and dmenu as a dependency
 - If you are on Gentoo, enable X, xcb and libdrm USE flags for the ffmpeg package
 - Rofi support might become a patch later on.
 
 ## Configuration
+NOTE: You do not need to configure it to use it however you should definitely do it if you want to change options.
 Create ~/.config/dfmpeg and save [this](https://raw.githubusercontent.com/speediegamer/dfmpeg/main/dfmpegrc) file to ~/.config/dfmpeg/dfmpegrc Now change these variables to what's present on your system:
 - DFMPEG_RESOLUTION (set to your screen resolution)
 - DFMPEG_AUDIO_DEVICE (set to either alsa or pulse)
@@ -30,7 +31,12 @@ Create ~/.config/dfmpeg and save [this](https://raw.githubusercontent.com/speedi
 - DFMPEG_EDITOR (set to an editor on your system such as vim)
 
 ## Credits
-Me, me me. Who else? No one.
+- Me
+- The awesome people who have contributed
 
 ## Have issues?
 Report any issues to the GitHub page Issues.
+
+## License
+This dmenu script is licensed under MIT.
+See the "about" or LICENSE file for more information.

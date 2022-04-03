@@ -1,0 +1,51 @@
+diff -up dfmpeg-vanilla/dfmpeg dfmpeg-patch/dfmpeg
+--- dfmpeg-vanilla/dfmpeg	2022-04-03 14:45:55.259169925 +0200
++++ dfmpeg-patch/dfmpeg	2022-04-03 14:45:07.438172998 +0200
+@@ -17,6 +17,7 @@ defaultConfig() {
+ 	DFMPEG_DMENU="dmenu" # Path to dmenu
+ 	DFMPEG_TERM="$TERMINAL" # Terminal to use when editing the configuration file.
+ 	DFMPEG_EDITOR="vim" # Editor to edit the config file with
++    DFMPEG_USE_DMENU=false # Use dmenu
+ }
+ 
+ defaultConfig
+@@ -29,6 +30,31 @@ about_screen="dfmpeg $dfmpeg_ver."
+ about_screen_2="Licensed under MIT, written by speedie + contributors."
+ about_screen_3="https://github.com/speediegamer/dfmpeg"
+ 
++case "$DFMPEG_USE_DMENU" in
++    "true") DFMPEG_USE_DMENU=false ;;
++	"false")
++	   clear && echo "dfmpeg $dfmpeg_ver"
++	   echo "What do you wanna do? Run :help if you need help."
++	   echo ":q to quit."
++	   echo -n ">" && read DFMPEG_ACTION
++    ;;
++esac
++
++case "$DFMPEG_ACTION" in
++    ":q") exit 0 ;;
++	":help") echo -e ":q // Quit\n:help // Display this help screen\n:r // Record with sound\n:rn // Record without sound\n:s // Stop recording\n:c // Open the config file in the defined text editor\n:a // Display the about screen" ;;
++    ":r") $startrec && ${0} && exit 0 ;;
++	":rn") $startrec_no_audio && ${0} && exit 0 ;;
++	":s") $stoprec && ${0} && exit 0 ;;
++	":c") $DFMPEG_TERM $DFMPEG_EDITOR $DFMPEG_DOTDIR/dfmpegrc && ${0} && exit 0 ;;
++	":a") $DFMPEG_TERM $DFMPEG_EDITOR $DFMPEG_DOTDIR/dfmpeg_about && ${0} && exit 0 ;;
++esac
++
++case "$DFMPEG_USE_DMENU" in
++    "false") DFMPEG_ACTION=:help && exit 0
++esac
++
++# Only do this if DMENU is enabled.
+ case "$(printf 'Start\nStop\nStart-No-Audio\nConfigure\nExit\nAbout' | dmenu -p 'Record your screen:')" in
+ 	"Exit") DFMPEG_STATUS=idle && exit 0 ;;
+ 	"Start") DFMPEG_STATUS=recording && $startrec && exit 0 ;;
+diff -up dfmpeg-vanilla/dfmpegrc dfmpeg-patch/dfmpegrc
+--- dfmpeg-vanilla/dfmpegrc	2022-04-03 14:45:53.344170048 +0200
++++ dfmpeg-patch/dfmpegrc	2022-04-03 14:23:24.205256743 +0200
+@@ -10,3 +10,4 @@ DFMPEG_WH=:0.0 # Width and height, no ne
+ DFMPEG_DMENU=dmenu # Path to dmenu
+ DFMPEG_TERM=$TERMINAL # Terminal to use when editing the configuration file.
+ DFMPEG_EDITOR=vim # Editor to edit the config file with
++DFMPEG_USE_DMENU=false # Use dmenu

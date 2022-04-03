@@ -24,7 +24,7 @@ defaultConfig
 startrec="ffmpeg -f $DFMPEG_RECORD_DEVICE -s $DFMPEG_RESOLUTION -i $DFMPEG_WH -f $DFMPEG_AUDIO_DEVICE -r $DFMPEG_FRAME_RATE -i default $DFMPEG_OUTPUT_FILENAME"
 startrec_no_audio="ffmpeg -f $DFMPEG_RECORD_DEVICE -s $DFMPEG_RESOLUTION -r $DFMPEG_FRAME_RATE -i $DFMPEG_WH $DFMPEG_OUTPUT_FILENAME"
 stoprec="pkill ffmpeg"
-dfmpeg_ver="2022-04-02-r2"
+dfmpeg_ver="2022-04-03-r1"
 about_screen="dfmpeg $dfmpeg_ver."
 about_screen_2="Licensed under MIT, written by speedie + contributors."
 about_screen_3="https://github.com/speediegamer/dfmpeg"

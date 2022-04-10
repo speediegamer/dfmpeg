@@ -34,7 +34,7 @@ case "$(printf 'Start\nStop\nStart-No-Audio\nConfigure\nExit\nAbout' | dmenu -p 
 	"Start") DFMPEG_STATUS=recording && touch /tmp/dfmpeg-recording && $startrec && exit 0 ;;
 	"Stop") $stoprec && rm /tmp/dfmpeg-recording && DFMPEG_STATUS=idle ;;
 	"Configure") $DFMPEG_TERM $DFMPEG_EDITOR $DFMPEG_DOTDIR/dfmpegrc ;;
-	"Start-No-Audio") DFMPEG_STATUS=recording && $startrec_no_audio && exit 0 ;;
+	"Start-No-Audio") DFMPEG_STATUS=recording && touch /tmp/dfmpeg-recording && $startrec_no_audio && exit 0 ;;
 	"About")
 		echo $about_screen > $DFMPEG_DOTDIR/dfmpeg_about
 		echo $about_screen_2 >> $DFMPEG_DOTDIR/dfmpeg_about

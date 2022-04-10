@@ -42,3 +42,5 @@ case "$(printf 'Start\nStop\nStart-No-Audio\nConfigure\nExit\nAbout' | dmenu -p 
 		$DFMPEG_TERM $DFMPEG_EDITOR $DFMPEG_DOTDIR/dfmpeg_about
 	;;
 esac
+
+exit 0 # This fixes a small bug.

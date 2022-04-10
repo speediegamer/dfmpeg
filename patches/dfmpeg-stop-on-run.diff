@@ -1,0 +1,34 @@
+diff -up dfmpeg-vanilla/dfmpeg dfmpeg-patch/dfmpeg
+--- dfmpeg-vanilla/dfmpeg	2022-04-10 11:56:41.414021739 +0200
++++ dfmpeg-patch/dfmpeg	2022-04-10 11:57:10.317023160 +0200
+@@ -17,6 +17,7 @@ defaultConfig() {
+ 	DFMPEG_DMENU="dmenu" # Path to dmenu
+ 	DFMPEG_TERM="$TERMINAL" # Terminal to use when editing the configuration file.
+ 	DFMPEG_EDITOR="vim" # Editor to edit the config file with
++    DFMPEG_STOP_ON_RUN=false # Stop recording once dfmpeg is loaded if it's already recording
+ }
+ 
+ defaultConfig
+@@ -29,6 +30,10 @@ about_screen="dfmpeg $dfmpeg_ver."
+ about_screen_2="Licensed under MIT, written by speedie + contributors."
+ about_screen_3="https://github.com/speediegamer/dfmpeg"
+ 
++case "$DFMPEG_STOP_ON_RUN" in
++    "true") ls /tmp/dfmpeg-recording && $stoprec && DFMPEG_STATUS=idle && rm /tmp/dfmpeg-recording && exit 0 ;;
++esac
++
+ case "$(printf 'Start\nStop\nStart-No-Audio\nConfigure\nExit\nAbout' | dmenu -p 'Record your screen:')" in
+ 	"Exit") DFMPEG_STATUS=idle && exit 0 ;;
+ 	"Start") DFMPEG_STATUS=recording && touch /tmp/dfmpeg-recording && $startrec && exit 0 ;;
+@@ -43,4 +48,4 @@ case "$(printf 'Start\nStop\nStart-No-Au
+ 	;;
+ esac
+ 
+diff -up dfmpeg-vanilla/dfmpegrc dfmpeg-patch/dfmpegrc
+--- dfmpeg-vanilla/dfmpegrc	2022-04-10 11:56:50.093022166 +0200
++++ dfmpeg-patch/dfmpegrc	2022-04-10 11:58:12.963026238 +0200
+@@ -10,3 +10,4 @@ DFMPEG_WH=:0.0 # Width and height, no ne
+ DFMPEG_DMENU=dmenu # Path to dmenu
+ DFMPEG_TERM=$TERMINAL # Terminal to use when editing the configuration file.
+ DFMPEG_EDITOR=vim # Editor to edit the config file with
++DFMPEG_STOP_ON_RUN=false # Stop recording when dfmpeg is loaded if its recording

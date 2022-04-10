@@ -31,7 +31,7 @@ about_screen_3="https://github.com/speediegamer/dfmpeg"
 
 case "$(printf 'Start\nStop\nStart-No-Audio\nConfigure\nExit\nAbout' | dmenu -p 'Record your screen:')" in
 	"Exit") DFMPEG_STATUS=idle && exit 0 ;;
-	"Start") DFMPEG_STATUS=recording && $startrec && touch /tmp/dfmpeg-recording && exit 0 ;;
+	"Start") DFMPEG_STATUS=recording && touch /tmp/dfmpeg-recording && $startrec && exit 0 ;;
 	"Stop") $stoprec && rm /tmp/dfmpeg-recording && DFMPEG_STATUS=idle ;;
 	"Configure") $DFMPEG_TERM $DFMPEG_EDITOR $DFMPEG_DOTDIR/dfmpegrc ;;
 	"Start-No-Audio") DFMPEG_STATUS=recording && $startrec_no_audio && exit 0 ;;

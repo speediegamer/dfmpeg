@@ -1,0 +1,36 @@
+diff -up dfmpeg-vanilla/dfmpeg dfmpeg-patch/dfmpeg
+--- dfmpeg-vanilla/dfmpeg	2022-04-10 11:56:41.414021739 +0200
++++ dfmpeg-patch/dfmpeg	2022-04-11 02:40:28.898682361 +0200
+@@ -17,6 +17,7 @@ defaultConfig() {
+ 	DFMPEG_DMENU="dmenu" # Path to dmenu
+ 	DFMPEG_TERM="$TERMINAL" # Terminal to use when editing the configuration file.
+ 	DFMPEG_EDITOR="vim" # Editor to edit the config file with
++    DFMPEG_MEDIA_PLAYER=mpv # Media player to play videos in
+ }
+ 
+ defaultConfig
+@@ -29,12 +30,13 @@ about_screen="dfmpeg $dfmpeg_ver."
+ about_screen_2="Licensed under MIT, written by speedie + contributors."
+ about_screen_3="https://github.com/speediegamer/dfmpeg"
+ 
+-case "$(printf 'Start\nStop\nStart-No-Audio\nConfigure\nExit\nAbout' | dmenu -p 'Record your screen:')" in
++case "$(printf 'Start\nStop\nStart-No-Audio\nConfigure\nExit\nAbout\nPlayLast' | dmenu -p 'Record your screen:')" in
+ 	"Exit") DFMPEG_STATUS=idle && exit 0 ;;
+-	"Start") DFMPEG_STATUS=recording && touch /tmp/dfmpeg-recording && $startrec && exit 0 ;;
++	"Start") DFMPEG_STATUS=recording && touch /tmp/dfmpeg-recording && echo $DFMPEG_OUTPUT_FILENAME > /tmp/dfmpeg-filename && $startrec && exit 0 ;;
+ 	"Stop") $stoprec && rm /tmp/dfmpeg-recording && DFMPEG_STATUS=idle ;;
+ 	"Configure") $DFMPEG_TERM $DFMPEG_EDITOR $DFMPEG_DOTDIR/dfmpegrc ;;
+-	"Start-No-Audio") DFMPEG_STATUS=recording && $startrec_no_audio && exit 0 ;;
++	"Start-No-Audio") DFMPEG_STATUS=recording && touch /tmp/dfmpeg-recording && echo $DFMPEG_OUTPUT_FILENAME > /tmp/dfmpeg-filename && $startrec_no_audio && exit 0 ;;
++	"PlayLast") DFMPEG_STATUS=idle && $DFMPEG_MEDIA_PLAYER $(cat /tmp/dfmpeg-filename) && exit 0 ;;
+ 	"About")
+ 		echo $about_screen > $DFMPEG_DOTDIR/dfmpeg_about
+ 		echo $about_screen_2 >> $DFMPEG_DOTDIR/dfmpeg_about
+diff -up dfmpeg-vanilla/dfmpegrc dfmpeg-patch/dfmpegrc
+--- dfmpeg-vanilla/dfmpegrc	2022-04-10 11:56:50.093022166 +0200
++++ dfmpeg-patch/dfmpegrc	2022-04-11 02:41:13.184684370 +0200
+@@ -10,3 +10,4 @@ DFMPEG_WH=:0.0 # Width and height, no ne
+ DFMPEG_DMENU=dmenu # Path to dmenu
+ DFMPEG_TERM=$TERMINAL # Terminal to use when editing the configuration file.
+ DFMPEG_EDITOR=vim # Editor to edit the config file with
++DFMPEG_MEDIA_PLAYER=mpv # Media player to play videos in

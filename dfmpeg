@@ -1,46 +1,132 @@
 #!/bin/sh
 # dfmpeg
-# dmenu gui for recording your screen with ffmpeg
+# dmenu/rofi GUI for recording your screen with ffmpeg
 # Licensed under MIT, written by speedie
-# https://github.com/speediegamer/dfmpeg
+# https://speedie.gq/dmenu-scripts
+
+# Dotfile directory
+DOTDIR=$HOME/.config/dfmpeg
+NOMKCONFIG=false # Do not create a config file if this is set to true
 
 defaultConfig() {
-	DFMPEG_DOTDIR="$HOME/.config/dfmpeg" # The directory where dotfiles are
-	DFMPEG_RESOLUTION="1920x1080" # The resolution to record in
-	DFMPEG_AUDIO_DEVICE="alsa" # How to capture audio (alsa/pulseaudio)
-	DFMPEG_FRAME_RATE="60" # Frame rate to capture in.
-	DFMPEG_RECORD_DEVICE="x11grab" # Probably do not change.
-	DFMPEG_OUTPUT_PATH="$HOME/Videos" # Path where videos will be saved.
-	DFMPEG_OUTPUT_FORMAT="mp4" # What format to use
-	DFMPEG_OUTPUT_FILENAME="$DFMPEG_OUTPUT_PATH/Dfmpeg-Output-$(date +"%d-%d-%y-%T").$DFMPEG_OUTPUT_FORMAT" # File name of the output. Probably don't need to change.
-	DFMPEG_WH=":0.0" # Width and height, no need to change, defaults should work.
-	DFMPEG_DMENU="dmenu" # Path to dmenu
-	DFMPEG_TERM="$TERMINAL" # Terminal to use when editing the configuration file.
-	DFMPEG_EDITOR="vim" # Editor to edit the config file with
+	RESOLUTION="1920x1080" # The resolution to record in
+	AUDIO_DEVICE="alsa" # How to capture audio (alsa/pulseaudio)
+	FRAME_RATE="60" # Frame rate to capture in.
+	RECORD_DEVICE="x11grab" # Probably do not change.
+	OUTPUT_PATH="$HOME/Recordings" # Path where videos will be saved.
+	OUTPUT_FORMAT="mp4" # What format to use
+	OUTPUT_FILENAME="dfmpeg-output" # File name of the output. Should not be a full path, should not contain the format.
+	ENCODE=true # Encode or not (true/false)
+	ENCODE_CODEC=libx264 # Codec to encode in
+	ENCODE_PRESET=ultrafast # ffmpeg preset. Available options: ultrafast, superfast, veryfast, faster, fast, medium, slow, slower, veryslow
+	RUNLAUNCHER=dmenu # Run launcher to use
+	WH=":0.0" # Width and height, as well as monitor, usually no need to change, defaults should work.
+	STATUS="none" # Status bar to restart when changing dfmpeg status. None means don't restart it.
+	TERM="$TERMINAL" # Terminal to use when editing the configuration file.
+	EDITOR="vim" # Editor to edit the config file with
+	MEDIA_PLAYER="mpv" # Media player to play videos in
+	STOPONRUN=false # Stop recording when dfmpeg runs again (true/false)
 }
 
 defaultConfig
-. "$DFMPEG_DOTDIR"/dfmpegrc
-startrec="ffmpeg -f $DFMPEG_RECORD_DEVICE -s $DFMPEG_RESOLUTION -i $DFMPEG_WH -f $DFMPEG_AUDIO_DEVICE -r $DFMPEG_FRAME_RATE -i default $DFMPEG_OUTPUT_FILENAME"
-startrec_no_audio="ffmpeg -f $DFMPEG_RECORD_DEVICE -s $DFMPEG_RESOLUTION -r $DFMPEG_FRAME_RATE -i $DFMPEG_WH $DFMPEG_OUTPUT_FILENAME"
-stoprec="pkill ffmpeg"
-dfmpeg_ver="2022-04-03-r1"
-about_screen="dfmpeg $dfmpeg_ver."
-about_screen_2="Licensed under MIT, written by speedie + contributors."
-about_screen_3="https://github.com/speediegamer/dfmpeg"
 
-case "$(printf 'Start\nStop\nStart-No-Audio\nConfigure\nExit\nAbout' | dmenu -p 'Record your screen:')" in
-	"Exit") DFMPEG_STATUS=idle && exit 0 ;;
-	"Start") DFMPEG_STATUS=recording && touch /tmp/dfmpeg-recording && $startrec && exit 0 ;;
-	"Stop") $stoprec && rm /tmp/dfmpeg-recording && DFMPEG_STATUS=idle ;;
-	"Configure") $DFMPEG_TERM $DFMPEG_EDITOR $DFMPEG_DOTDIR/dfmpegrc ;;
-	"Start-No-Audio") DFMPEG_STATUS=recording && touch /tmp/dfmpeg-recording && $startrec_no_audio && exit 0 ;;
+USECONFIG() {
+  echo "Using $DOTDIR/config for configuration!" && . $DOTDIR/config
+}
+
+MKCONFIG() {
+  if [ -e "$DOTDIR/config" ]; then
+		USECONFIG
+  else
+		if [ "$NOMKCONFIG" = "false" ]; then
+				mkdir -p $DOTDIR
+				printf "RESOLUTION=$RESOLUTION # The resolution to capture in" > $DOTDIR/config
+				printf "\nAUDIO_DEVICE=$AUDIO_DEVICE # How to capture audio (alsa/pulseaudio)" >> $DOTDIR/config
+				printf "\nFRAME_RATE=$FRAME_RATE # Frame rate to capture in." >> $DOTDIR/config
+				printf "\nOUTPUT_PATH=$OUTPUT_PATH # Directory where captures will be saved." >> $DOTDIR/config
+				printf "\nOUTPUT_FORMAT=$OUTPUT_FORMAT # What format to use" >> $DOTDIR/config
+				printf "\nOUTPUT_FILENAME='dfmpeg-output'" >> $DOTDIR/config
+				printf "\nWH=$WH # Monitor to record" >> $DOTDIR/config
+				printf "\n\nRECORD_DEVICE=$RECORD_DEVICE" >> $DOTDIR/config
+				printf "\nRUNLAUNCHER=$RUNLAUNCHER # Run launcher to use as menu." >> $DOTDIR/config
+				printf "\nTERM=$TERMINAL # Terminal to use when editing the config file" >> $DOTDIR/config
+				printf "\nEDITOR=$EDITOR # Editor to edit the config file" >> $DOTDIR/config
+				printf "\nMEDIA_PLAYER=$MEDIA_PLAYER # Media player to play videos in" >> $DOTDIR/config
+				printf "\nSTATUS=$STATUS # Status bar to restart when changing dfmpeg status. 'none' means don't start it." >> $DOTDIR/config
+				printf "\n\nENCODE=$ENCODE # Encode or not on 'Stop' (true/false)" >> $DOTDIR/config
+				printf "\nENCODE_CODEC=$ENCODE_CODEC # Codec to encode in (libx264 is default)" >> $DOTDIR/config
+				printf "\nENCODE_PRESET=$ENCODE_PRESET # ffmpeg preset. Available options: ultrafast, superfast, veryfast, faster, fast, medium, slow, slower, veryslow" >> $DOTDIR/config
+				printf "\n\nSTOPONRUN=$STOPONRUN # Stop recording when dfmpeg runs again (true/false)" >> $DOTDIR/config
+		fi
+  fi
+}
+
+MKCONFIG
+
+OUTPUT_FILENAME="$OUTPUT_PATH/$OUTPUT_FILENAME.$OUTPUT_FORMAT"
+
+mkdir -p $OUTPUT_PATH # Create the output directory if it doesn't exist.
+if [ "$ENCODE" = "false" ]; then
+		startrec="ffmpeg -f $RECORD_DEVICE -s $RESOLUTION -i $WH -f $AUDIO_DEVICE -r $FRAME_RATE -i default $OUTPUT_FILENAME"
+		startrec_no_audio="ffmpeg -y -f $RECORD_DEVICE -s $RESOLUTION -r $FRAME_RATE -i $WH $OUTPUT_FILENAME"
+else
+		startrec="ffmpeg -y -f x11grab -framerate $FRAME_RATE -s $RESOLUTION -i $WH -f $AUDIO_DEVICE -i default -r 30 -c:v $ENCODE_CODEC -crf 0 -preset ultrafast -c:a aac $OUTPUT_FILENAME"
+		startrec_no_audio="ffmpeg -y -f x11grab -framerate $FRAME_RATE -s $RESOLUTION -i $WH -r 30 -c:v $ENCODE_CODEC -crf 0 -preset ultrafast -c:a aac $OUTPUT_FILENAME"
+fi
+
+encode() {
+		if [ "$ENCODE" = "true" ]; then
+				cp $(cat /tmp/outputfilename) /tmp/rec.$OUTPUT_FORMAT
+				ffmpeg -i /tmp/rec.$OUTPUT_FORMAT -c:v $ENCODE_CODEC -preset $ENCODE_PRESET -threads 0 -b:v -pass 1 -f $OUTPUT_FORMAT -qp 0
+				cp /tmp/rec.$OUTPUT_FORMAT $(cat /tmp/outputfilename)
+				rm -f "/tmp/rec.$OUTPUT_FORMAT"
+		fi
+}
+
+dfmpeg_ver="1.0-2022-08-07-r1"
+about_screen="dfmpeg $dfmpeg_ver."
+about_screen_2="Licensed under MIT, written by speedie.gq + contributors."
+about_screen_3="Modified for https://speedie.gq/dwm"
+about_screen_4="https://speedie.gq/dmenu-scripts"
+
+# Stop instantly if enabled
+case "$STOPONRUN" in
+"true") ls /tmp/dfmpeg-recording && pkill ffmpeg ; rm /tmp/dfmpeg-recording ; STATUS=idle ; exit 0 ;;
+esac
+
+# More options
+MORE_OPTIONS() {
+  case "$(printf 'Encode last recording\nEncode video\nConfigure\n------\n..\nExit' | $RUNLAUNCHER -l 40 -p 'More options')" in
+  "Encode last recording") encode ; exit 0 ;;
+  "Encode video") echo "$(echo "" | $RUNLAUNCHER -l 1 -g 1 -p "What video file do you want to encode?")" > /tmp/outputfilename && encode ; exit 0 ;;
+  "Configure") $TERM $EDITOR $DOTDIR/config ; exit 0 ;;
+  "Exit") exit 0 ;;
+  esac
+
+  $0 && exit 0
+}
+
+# Check what to do.
+case "$(printf 'Start\nStop\nStart without audio\nPlay last\n------\nMore options\nAbout\nExit' | $RUNLAUNCHER -l 40 -p 'Record your screen:')" in
+	"Exit") STATUS=idle && exit 0 ;;
+	"Start") echo "$OUTPUT_FILENAME" > /tmp/outputfilename && STATUS=recording && touch /tmp/dfmpeg-recording
+	pgrep -x $STATUS && pkill $STATUS && $STATUS &
+	$startrec && exit 0 ;;
+	"Stop") pkill ffmpeg ; rm /tmp/dfmpeg-recording ; STATUS=idle
+	pgrep -x $STATUS && pkill $STATUS && $STATUS & ;;
+	"Start without audio") echo "$OUTPUT_FILENAME" > /tmp/outputfilename && STATUS=recording && touch /tmp/dfmpeg-recording
+	pgrep -x $STATUS && pkill $STATUS && $STATUS &
+	$startrec_no_audio && exit 0 ;;
+	"Play last") DFMPEG_STATUS=idle && $MEDIA_PLAYER $(cat /tmp/outputfilename) && exit 0 ;;
+	"More options") MORE_OPTIONS && exit 0 ;;
+	"") $0 && exit 0 ;;
 	"About")
-		echo $about_screen > $DFMPEG_DOTDIR/dfmpeg_about
-		echo $about_screen_2 >> $DFMPEG_DOTDIR/dfmpeg_about
-		echo $about_screen_3 >> $DFMPEG_DOTDIR/dfmpeg_about
-		$DFMPEG_TERM $DFMPEG_EDITOR $DFMPEG_DOTDIR/dfmpeg_about
+		echo $about_screen > /tmp/dfmpeg_about
+		echo $about_screen_2 >> /tmp/dfmpeg_about
+		echo $about_screen_3 >> /tmp/dfmpeg_about
+		echo $about_screen_4 >> /tmp/dfmpeg_about
+		cat /tmp/dfmpeg_about | $RUNLAUNCHER -l 40 -g 1
 	;;
 esac
 
-exit 0 # This fixes a small bug.
+exit 0

@@ -86,8 +86,7 @@ encode() {
 dfmpeg_ver="1.0-2022-08-07-r1"
 about_screen="dfmpeg $dfmpeg_ver."
 about_screen_2="Licensed under MIT, written by speedie.gq + contributors."
-about_screen_3="Modified for https://speedie.gq/dwm"
-about_screen_4="https://speedie.gq/dmenu-scripts"
+about_screen_3="https://speedie.gq/dmenu-scripts"
 
 # Stop instantly if enabled
 case "$STOPONRUN" in
@@ -124,7 +123,6 @@ case "$(printf 'Start\nStop\nStart without audio\nPlay last\n------\nMore option
 		echo $about_screen > /tmp/dfmpeg_about
 		echo $about_screen_2 >> /tmp/dfmpeg_about
 		echo $about_screen_3 >> /tmp/dfmpeg_about
-		echo $about_screen_4 >> /tmp/dfmpeg_about
 		cat /tmp/dfmpeg_about | $RUNLAUNCHER -l 40 -g 1
 	;;
 esac
